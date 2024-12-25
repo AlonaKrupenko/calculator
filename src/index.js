@@ -1,3 +1,2 @@
-import "./styles.css";
-
-console.log("Calculator App Initialized");
+import './styles.css';
+console.log('Calculator App Initialize');

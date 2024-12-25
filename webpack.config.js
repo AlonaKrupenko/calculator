@@ -1,16 +1,16 @@
-const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
-  entry: "./src/index.js",
+  entry: './src/index.js',
   output: {
-    filename: "main.[contenthash].js",
-    path: path.resolve(__dirname, "dist"),
+    filename: 'main.[contenthash].js',
+    path: path.resolve(__dirname, 'dist'),
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: "./src/index.html",
+      template: './src/index.html',
       minify: {
         collapseWhitespace: true,
         removeComments: true,
@@ -29,7 +29,7 @@ module.exports = {
     rules: [
       {
         test: /\.css$/i, // Handle CSS imports
-        use: ["style-loader", "css-loader"],
+        use: ['style-loader', 'css-loader'],
       },
     ],
   },
@@ -38,17 +38,17 @@ module.exports = {
   },
   devServer: {
     static: {
-      directory: path.join(__dirname, "dist"),
+      directory: path.join(__dirname, 'dist'),
     },
     port: 3000,
     open: true,
   },
   devServer: {
     static: {
-      directory: path.join(__dirname, "dist"),
+      directory: path.join(__dirname, 'dist'),
     },
     port: 3000,
     open: true,
   },
-  mode: "development",
+  mode: 'development',
 };
