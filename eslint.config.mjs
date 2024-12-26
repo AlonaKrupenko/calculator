@@ -1,7 +1,7 @@
 export default [
   {
-    files: ['**/*.js'],
-    languageOptions: {
+    files: ["**/*.js"],
+      languageOptions: {
       globals: {
         browser: true,
         es6: true,

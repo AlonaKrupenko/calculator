@@ -1,2 +1,6 @@
 import './styles.css';
-console.log('Calculator App Initialize');
+function testHusky() {
+  return 'hello world';
+}
+
+testHusky();
