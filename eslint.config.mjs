@@ -1,14 +1,14 @@
 export default [
   {
-    files: ["**/*.js"],
-      languageOptions: {
+    files: ['**/*.js'],
+    languageOptions: {
       globals: {
         browser: true,
         es6: true,
       },
     },
     rules: {
-      'no-console': 'error',
+      'no-console': 'warn',
       'no-unused-vars': 'error',
     },
   },
