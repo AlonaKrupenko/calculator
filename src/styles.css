@@ -1,9 +1,83 @@
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  min-height: 90vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: sans-serif;
+  /* box-sizing: border-box; */
 }
 
-#app {
-  padding: 20px;
-  text-align: center;
+.container {
+  box-sizing: border-box;
+  background-color: #535353;
+  max-width: 300px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 16px;
+  user-select: none;
+  box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
+}
+
+#answerArea {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  align-items: end;
+  gap: 4px;
+  width: 100%;
+  height: 96px;
+  padding: 8px;
+  overflow: hidden;
+}
+
+.inputHistory {
+  font-size: large;
+  color: #7d7d7d;
+}
+
+.displayValue {
+  font-size: xx-large;
+  color: white;
+}
+
+.keypad-btns {
+  display: grid;
+  grid: repeat(5, 75px) / repeat(4, 75px);
+  width: 100%;
+}
+
+.keypad-btns button {
+  outline: none;
+  border: none;
+  background-color: #7d7d7d;
+  color: white;
+  font-size: x-large;
+  border: 1px solid #535353;
+}
+
+.keypad-btns button:last-child {
+  border-bottom-right-radius: 16px;
+}
+
+.keypad-btns button:nth-last-child(4) {
+  border-bottom-left-radius: 16px;
+}
+
+.keypad-btns .accent_btn_top {
+  background-color: #646464;
+}
+
+.keypad-btns .accent_btn_side {
+  background-color: #ff9f0b;
+}
+
+.accent_btn_side:hover,
+.accent_btn_top:hover,
+.basic_btn:hover {
+  filter: brightness(90%);
 }
