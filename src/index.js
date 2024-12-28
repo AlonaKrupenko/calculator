@@ -1,9 +1,7 @@
 import './styles.css';
 
-// let inputHistory = document.querySelector('.inputHistory');
-// let calculateBtn = document.querySelector('#calculate');
-
 let displayValue = document.querySelector('.displayValue');
+let inputHistory = document.querySelector('.inputHistory');
 
 let buttons = document.querySelectorAll('button');
 
@@ -102,6 +100,99 @@ const handleErase = () => {
   updateDisplay();
 };
 
+//Helper ',' => '.'
+const transformCommaToDot = (input) => input.replace(',', '.');
+
+const handleCalculate = () => {
+  commitCurrentInput();
+
+  let transformedInput = realTimeScreenValue.map((item) => {
+    if (item.includes(',')) {
+      return transformCommaToDot(item);
+    }
+    return item;
+  });
+
+  console.log(evaluate(transformedInput), 'transformedInput');
+
+  // displayValue.innerHTML = calculate(transformedInput); //! updateDisplay function to use but need to update
+  inputHistory.innerHTML = realTimeScreenValue.join('');
+
+  realTimeScreenValue = [];
+  currentInput = '';
+};
+
+function evaluate(expression) {
+  function calculate(a, b, operator) {
+    if (operator === '+') return a + b;
+    if (operator === '-') return a - b;
+    if (operator === '*') return a * b;
+    if (operator === '/') return b === 0 ? NaN : a / b;
+  }
+
+  function parse(inputElements) {
+    if (inputElements.length === 1) return +inputElements[0];
+
+    for (let i = 0; i < inputElements.length; i++) {
+      if (inputElements[i] === '*' || inputElements[i] === '/') {
+        if (inputElements[i - 1].toString().includes('%') && inputElements[i + 1].toString().includes('%')) {
+          const result = calculate(
+            +inputElements[i - 1].slice(0, -1) / 100,
+            +inputElements[i + 1].slice(0, -1) / 100,
+            inputElements[i],
+          );
+          const rest = inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
+          return parse(rest);
+        } else if (inputElements[i - 1].toString().includes('%')) {
+          const result = calculate(+inputElements[i - 1].slice(0, -1) / 100, +inputElements[i + 1], inputElements[i]);
+          const rest = inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
+          return parse(rest);
+        } else if (inputElements[i + 1].toString().includes('%')) {
+          const result = calculate(+inputElements[i - 1], +inputElements[i + 1].slice(0, -1) / 100, inputElements[i]);
+          const rest = inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
+          return parse(rest);
+        } else {
+          const result = calculate(+inputElements[i - 1], +inputElements[i + 1], inputElements[i]);
+          const rest = inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
+          return parse(rest);
+        }
+      }
+    }
+
+    for (let i = 0; i < inputElements.length; i++) {
+      if (inputElements[i] === '+' || inputElements[i] === '-') {
+        if (inputElements[i - 1].toString().includes('%') && inputElements[i + 1].toString().includes('%')) {
+          const result = calculate(
+            +inputElements[i - 1].slice(0, -1) / 100,
+            +inputElements[i + 1].slice(0, -1) / 100,
+            inputElements[i],
+          );
+          const rest = inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
+          return parse(rest);
+        } else if (inputElements[i - 1].toString().includes('%')) {
+          const result = calculate(+inputElements[i - 1].slice(0, -1) / 100, +inputElements[i + 1], inputElements[i]);
+          const rest = inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
+          return parse(rest);
+        } else if (inputElements[i + 1].toString().includes('%')) {
+          const result = calculate(
+            +inputElements[i - 1],
+            (+inputElements[i - 1] * +inputElements[i + 1].slice(0, -1)) / 100,
+            inputElements[i],
+          );
+          const rest = inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
+          return parse(rest);
+        } else {
+          const result = calculate(+inputElements[i - 1], +inputElements[i + 1], inputElements[i]);
+          const rest = inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
+          return parse(rest);
+        }
+      }
+    }
+  }
+
+  return parse(expression);
+}
+
 buttons.forEach((btn) => {
   btn.addEventListener('click', () => {
     //? FIGURES handling
@@ -148,6 +239,9 @@ buttons.forEach((btn) => {
       currentInput = '';
       realTimeScreenValue = [];
       updateDisplay();
+
+      //! maybe wrap this into func
+      inputHistory.innerHTML = '';
     }
 
     if (btn.id === 'erase') {
@@ -167,6 +261,10 @@ buttons.forEach((btn) => {
     //?PERCENT handling
     if (btn.id === 'percent') {
       handlePercentage();
+    }
+
+    if (btn.id === 'calculate') {
+      handleCalculate();
     }
   });
 });
