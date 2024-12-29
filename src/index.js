@@ -125,7 +125,7 @@ const handleCalculate = () => {
 
   let calculationResult = transformDotToComma(roundToFourDecimals(evaluate(transformedInput)));
 
-  displayValue.innerHTML = calculationResult; //! updateDisplay function to use but need to update
+  displayValue.innerHTML = calculationResult;
   inputHistory.innerHTML = realTimeScreenValue.join('');
 
   currentInput = calculationResult;

@@ -12,4 +12,7 @@ export default [
       'no-unused-vars': 'error',
     },
   },
+  {
+    ignores: ['dist/'],
+  },
 ];
