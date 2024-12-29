@@ -16,8 +16,13 @@ const updateDisplay = () => {
 //HELPER
 const commitCurrentInput = () => {
   if (currentInput) {
-    currentInput = trimTrailingZeros(currentInput); //! make it optional?
-    realTimeScreenValue.push(currentInput);
+    currentInput = trimTrailingZeros(currentInput);
+
+    if (currentInput.startsWith('(-') && !currentInput.includes(')')) {
+      realTimeScreenValue.push(currentInput + ')');
+    } else {
+      realTimeScreenValue.push(currentInput);
+    }
     currentInput = '';
   }
 };
@@ -26,11 +31,12 @@ const commitCurrentInput = () => {
 const trimTrailingZeros = (input) => {
   if (input.includes(',')) {
     const [integerPart, decimalPart] = input.split(',');
+
     const trimmedDecimal = decimalPart.replace(/0+$/, '');
     return trimmedDecimal ? `${integerPart},${trimmedDecimal}` : integerPart;
   }
 
-  return input;
+  return input.replace(/^0+/, '') || '0';
 };
 
 //! Helper function: Invert the last number
@@ -39,6 +45,8 @@ const invertLastNumber = () => {
   if (currentInput) {
     if (currentInput.startsWith('(-') && currentInput.endsWith(')')) {
       currentInput = currentInput.slice(2, -1);
+    } else if (currentInput.startsWith('(-') && !currentInput.includes(')')) {
+      currentInput = currentInput.slice(2);
     } else {
       currentInput = `(-${currentInput})`;
     }
@@ -82,14 +90,11 @@ const handlePercentage = () => {
 
 const handleErase = () => {
   if (currentInput) {
-    //!TO MAKE LIKE Iphone
-    if (currentInput.startsWith('(-') && currentInput.endsWith(')')) {
-      currentInput = '';
-    } else {
-      currentInput = currentInput.slice(0, -1);
-    }
+    currentInput = currentInput.slice(0, -1);
   } else if (realTimeScreenValue.length > 0) {
     const lastElement = realTimeScreenValue.pop();
+    currentInput = realTimeScreenValue.pop();
+
     if (lastElement.startsWith('(-') && lastElement.endsWith(')')) {
       return;
     } else if (lastElement.length > 1) {
@@ -123,22 +128,21 @@ const handleCalculate = () => {
     return item;
   });
 
-  displayValue.innerHTML = transformDotToComma(evaluate(transformedInput)); //! updateDisplay function to use but need to update
+  let calculationResult = transformDotToComma(evaluate(transformedInput));
+
+  displayValue.innerHTML = calculationResult; //! updateDisplay function to use but need to update
   inputHistory.innerHTML = realTimeScreenValue.join('');
 
-  console.log(transformedInput, transformDotToComma(evaluate(transformedInput)), 'higher level');
-
+  currentInput = calculationResult;
   realTimeScreenValue = [];
-  currentInput = '';
 };
 
 const evaluate = (expression) => {
   const calculate = (leftOperand, rightOperand, operator) => {
-    console.log(leftOperand, rightOperand, operator, 'calculate');
-    if (operator === '+') return leftOperand + rightOperand;
-    if (operator === '-') return leftOperand - rightOperand;
-    if (operator === '*') return leftOperand * rightOperand;
-    if (operator === '/') return rightOperand === 0 ? NaN : leftOperand / rightOperand;
+    if (operator === '+') return normalize(leftOperand) + normalize(rightOperand);
+    if (operator === '-') return normalize(leftOperand) - normalize(rightOperand);
+    if (operator === '*') return normalize(leftOperand) * normalize(rightOperand);
+    if (operator === '/') return rightOperand === 0 ? NaN : normalize(leftOperand) / normalize(rightOperand);
   };
 
   const joinUpdatedArray = (inputElements, i, result) => {
@@ -146,24 +150,31 @@ const evaluate = (expression) => {
   };
 
   const normalize = (value) => {
-    if (!value.toString().startsWith('(-')) {
+    if (value) {
+      if (value.toString().startsWith('(-') && value.toString().endsWith(')')) {
+        return value.slice(1, -1);
+      } else if (value.toString().startsWith('(-') && value.toString().endsWith('%')) {
+        return `${value.slice(1, -2)}%`;
+      }
+
       return value;
     }
-    return parseFloat(value.slice(1, -1));
   };
 
   function parse(inputElements) {
     if (inputElements.length === 1) {
-      if (inputElements[0].toString().includes('%')) {
+      if (inputElements[0].toString().includes('%') && inputElements[0].startsWith('(-')) {
+        return +normalize(inputElements[0]).slice(0, -1) / 100;
+      } else if (inputElements[0].toString().includes('%')) {
         return +inputElements[0].slice(0, -1) / 100;
+      } else {
+        return +inputElements[0];
       }
-
-      return +inputElements[0];
     }
 
     for (let i = 0; i < inputElements.length; i++) {
-      const leftOperand = inputElements[i - 1];
-      const rightOperand = inputElements[i + 1];
+      const leftOperand = normalize(inputElements[i - 1]);
+      const rightOperand = normalize(inputElements[i + 1]);
 
       if (inputElements[i] === '*' || inputElements[i] === '/') {
         if (leftOperand.toString().includes('%') && rightOperand.toString().includes('%')) {
@@ -174,11 +185,7 @@ const evaluate = (expression) => {
           return parse(joinUpdatedArray(inputElements, i, result));
         } else if (rightOperand.toString().includes('%')) {
           //!different
-          console.log(rightOperand, +rightOperand.slice(0, -1) / 100, 'check');
           const result = calculate(+leftOperand, +rightOperand.slice(0, -1) / 100, inputElements[i]);
-          return parse(joinUpdatedArray(inputElements, i, result));
-        } else if (leftOperand.toString().includes('(-') || rightOperand.toString().includes('(-')) {
-          const result = calculate(+normalize(leftOperand), +normalize(rightOperand), inputElements[i]);
           return parse(joinUpdatedArray(inputElements, i, result));
         } else {
           const result = calculate(+leftOperand, +rightOperand, inputElements[i]);
@@ -188,8 +195,8 @@ const evaluate = (expression) => {
     }
 
     for (let i = 0; i < inputElements.length; i++) {
-      const leftOperand = inputElements[i - 1];
-      const rightOperand = inputElements[i + 1];
+      const leftOperand = normalize(inputElements[i - 1]);
+      const rightOperand = normalize(inputElements[i + 1]);
 
       if (inputElements[i] === '+' || inputElements[i] === '-') {
         if (leftOperand.toString().includes('%') && rightOperand.toString().includes('%')) {
@@ -201,9 +208,6 @@ const evaluate = (expression) => {
         } else if (rightOperand.toString().includes('%')) {
           //!different
           const result = calculate(+leftOperand, (+leftOperand * +rightOperand.slice(0, -1)) / 100, inputElements[i]);
-          return parse(joinUpdatedArray(inputElements, i, result));
-        } else if (leftOperand.toString().includes('(-') || rightOperand.toString().includes('(-')) {
-          const result = calculate(+normalize(leftOperand), +normalize(rightOperand), inputElements[i]);
           return parse(joinUpdatedArray(inputElements, i, result));
         } else {
           const result = calculate(+leftOperand, +rightOperand, inputElements[i]);
