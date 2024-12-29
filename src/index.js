@@ -103,8 +103,18 @@ const handleErase = () => {
 //Helper ',' => '.'
 const transformCommaToDot = (input) => input.replace(',', '.');
 
+//Helper '.' => ','
+const transformDotToComma = (input) => {
+  return input.toString().replace('.', ',');
+};
+
 const handleCalculate = () => {
   commitCurrentInput();
+
+  if (realTimeScreenValue.length === 0) {
+    alert('You need to input something before calculation');
+    return;
+  }
 
   let transformedInput = realTimeScreenValue.map((item) => {
     if (item.includes(',')) {
@@ -113,85 +123,98 @@ const handleCalculate = () => {
     return item;
   });
 
-  console.log(evaluate(transformedInput), 'transformedInput');
-
-  // displayValue.innerHTML = calculate(transformedInput); //! updateDisplay function to use but need to update
+  displayValue.innerHTML = transformDotToComma(evaluate(transformedInput)); //! updateDisplay function to use but need to update
   inputHistory.innerHTML = realTimeScreenValue.join('');
+
+  console.log(transformedInput, transformDotToComma(evaluate(transformedInput)), 'higher level');
 
   realTimeScreenValue = [];
   currentInput = '';
 };
 
-function evaluate(expression) {
-  function calculate(a, b, operator) {
-    if (operator === '+') return a + b;
-    if (operator === '-') return a - b;
-    if (operator === '*') return a * b;
-    if (operator === '/') return b === 0 ? NaN : a / b;
-  }
+const evaluate = (expression) => {
+  const calculate = (leftOperand, rightOperand, operator) => {
+    console.log(leftOperand, rightOperand, operator, 'calculate');
+    if (operator === '+') return leftOperand + rightOperand;
+    if (operator === '-') return leftOperand - rightOperand;
+    if (operator === '*') return leftOperand * rightOperand;
+    if (operator === '/') return rightOperand === 0 ? NaN : leftOperand / rightOperand;
+  };
+
+  const joinUpdatedArray = (inputElements, i, result) => {
+    return inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
+  };
+
+  const normalize = (value) => {
+    if (!value.toString().startsWith('(-')) {
+      return value;
+    }
+    return parseFloat(value.slice(1, -1));
+  };
 
   function parse(inputElements) {
-    if (inputElements.length === 1) return +inputElements[0];
+    if (inputElements.length === 1) {
+      if (inputElements[0].toString().includes('%')) {
+        return +inputElements[0].slice(0, -1) / 100;
+      }
+
+      return +inputElements[0];
+    }
 
     for (let i = 0; i < inputElements.length; i++) {
+      const leftOperand = inputElements[i - 1];
+      const rightOperand = inputElements[i + 1];
+
       if (inputElements[i] === '*' || inputElements[i] === '/') {
-        if (inputElements[i - 1].toString().includes('%') && inputElements[i + 1].toString().includes('%')) {
-          const result = calculate(
-            +inputElements[i - 1].slice(0, -1) / 100,
-            +inputElements[i + 1].slice(0, -1) / 100,
-            inputElements[i],
-          );
-          const rest = inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
-          return parse(rest);
-        } else if (inputElements[i - 1].toString().includes('%')) {
-          const result = calculate(+inputElements[i - 1].slice(0, -1) / 100, +inputElements[i + 1], inputElements[i]);
-          const rest = inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
-          return parse(rest);
-        } else if (inputElements[i + 1].toString().includes('%')) {
-          const result = calculate(+inputElements[i - 1], +inputElements[i + 1].slice(0, -1) / 100, inputElements[i]);
-          const rest = inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
-          return parse(rest);
+        if (leftOperand.toString().includes('%') && rightOperand.toString().includes('%')) {
+          const result = calculate(+leftOperand.slice(0, -1) / 100, +rightOperand.slice(0, -1) / 100, inputElements[i]);
+          return parse(joinUpdatedArray(inputElements, i, result));
+        } else if (leftOperand.toString().includes('%')) {
+          const result = calculate(+leftOperand.slice(0, -1) / 100, +rightOperand, inputElements[i]);
+          return parse(joinUpdatedArray(inputElements, i, result));
+        } else if (rightOperand.toString().includes('%')) {
+          //!different
+          console.log(rightOperand, +rightOperand.slice(0, -1) / 100, 'check');
+          const result = calculate(+leftOperand, +rightOperand.slice(0, -1) / 100, inputElements[i]);
+          return parse(joinUpdatedArray(inputElements, i, result));
+        } else if (leftOperand.toString().includes('(-') || rightOperand.toString().includes('(-')) {
+          const result = calculate(+normalize(leftOperand), +normalize(rightOperand), inputElements[i]);
+          return parse(joinUpdatedArray(inputElements, i, result));
         } else {
-          const result = calculate(+inputElements[i - 1], +inputElements[i + 1], inputElements[i]);
-          const rest = inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
-          return parse(rest);
+          const result = calculate(+leftOperand, +rightOperand, inputElements[i]);
+          return parse(joinUpdatedArray(inputElements, i, result));
         }
       }
     }
 
     for (let i = 0; i < inputElements.length; i++) {
+      const leftOperand = inputElements[i - 1];
+      const rightOperand = inputElements[i + 1];
+
       if (inputElements[i] === '+' || inputElements[i] === '-') {
-        if (inputElements[i - 1].toString().includes('%') && inputElements[i + 1].toString().includes('%')) {
-          const result = calculate(
-            +inputElements[i - 1].slice(0, -1) / 100,
-            +inputElements[i + 1].slice(0, -1) / 100,
-            inputElements[i],
-          );
-          const rest = inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
-          return parse(rest);
-        } else if (inputElements[i - 1].toString().includes('%')) {
-          const result = calculate(+inputElements[i - 1].slice(0, -1) / 100, +inputElements[i + 1], inputElements[i]);
-          const rest = inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
-          return parse(rest);
-        } else if (inputElements[i + 1].toString().includes('%')) {
-          const result = calculate(
-            +inputElements[i - 1],
-            (+inputElements[i - 1] * +inputElements[i + 1].slice(0, -1)) / 100,
-            inputElements[i],
-          );
-          const rest = inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
-          return parse(rest);
+        if (leftOperand.toString().includes('%') && rightOperand.toString().includes('%')) {
+          const result = calculate(+leftOperand.slice(0, -1) / 100, +rightOperand.slice(0, -1) / 100, inputElements[i]);
+          return parse(joinUpdatedArray(inputElements, i, result));
+        } else if (leftOperand.toString().includes('%')) {
+          const result = calculate(+leftOperand.slice(0, -1) / 100, +rightOperand, inputElements[i]);
+          return parse(joinUpdatedArray(inputElements, i, result));
+        } else if (rightOperand.toString().includes('%')) {
+          //!different
+          const result = calculate(+leftOperand, (+leftOperand * +rightOperand.slice(0, -1)) / 100, inputElements[i]);
+          return parse(joinUpdatedArray(inputElements, i, result));
+        } else if (leftOperand.toString().includes('(-') || rightOperand.toString().includes('(-')) {
+          const result = calculate(+normalize(leftOperand), +normalize(rightOperand), inputElements[i]);
+          return parse(joinUpdatedArray(inputElements, i, result));
         } else {
-          const result = calculate(+inputElements[i - 1], +inputElements[i + 1], inputElements[i]);
-          const rest = inputElements.slice(0, i - 1).concat(result, inputElements.slice(i + 2));
-          return parse(rest);
+          const result = calculate(+leftOperand, +rightOperand, inputElements[i]);
+          return parse(joinUpdatedArray(inputElements, i, result));
         }
       }
     }
   }
 
   return parse(expression);
-}
+};
 
 buttons.forEach((btn) => {
   btn.addEventListener('click', () => {
@@ -245,6 +268,7 @@ buttons.forEach((btn) => {
     }
 
     if (btn.id === 'erase') {
+      //!'Provides too much bugs'
       handleErase();
     }
 

@@ -36,13 +36,31 @@ body {
 }
 
 .inputHistory {
+  text-align: right;
   font-size: large;
   color: #7d7d7d;
+  width: 100%;
+  white-space: nowrap;
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+
+.inputHistory::-webkit-scrollbar {
+  height: 2px;
+}
+
+.inputHistory::-webkit-scrollbar-thumb {
+  background: #7d7d7d;
+}
+
+.inputHistory::-webkit-scrollbar-track {
+  background: #ff9d0b8c;
 }
 
 .displayValue {
   font-size: xx-large;
   color: white;
+  white-space: nowrap;
 }
 
 .keypad-btns {
