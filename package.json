@@ -10,7 +10,7 @@
     "prepare": "husky install",
     "lint": "eslint . --fix && prettier --write . ",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d dist"
   },
   "repository": {
     "type": "git",
