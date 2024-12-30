@@ -1,5 +1,5 @@
 export const normalize = (value) => {
-  if (value) {
+  if (value || value === 0) {
     if (!value.toString().startsWith('(-')) {
       return value;
     }

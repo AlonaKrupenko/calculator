@@ -1,6 +1,6 @@
 import './styles.css';
-import { calculate } from './basicOperandsCalculation';
-import { normalize } from './normalize';
+import { calculate } from './helpers/basicOperandsCalculation';
+import { normalize } from './helpers/normalize';
 import {
   transformCommaToDot,
   transformDotToComma,
@@ -8,7 +8,7 @@ import {
   percentToDecimal,
   joinUpdatedArray,
   trimTrailingZeros,
-} from './helpers';
+} from './helpers/helpers';
 
 let displayValue = document.querySelector('.displayValue');
 let inputHistory = document.querySelector('.inputHistory');
@@ -26,12 +26,10 @@ button.addEventListener('click', () => {
   document.querySelector('html').setAttribute('data-theme', newTheme);
 });
 
-//HELPER
 const updateDisplay = () => {
   displayValue.innerHTML = realTimeScreenValue.join('') + currentInput || '0';
 };
 
-//HELPER
 const commitCurrentInput = () => {
   if (currentInput) {
     currentInput = trimTrailingZeros(currentInput);
@@ -59,6 +57,7 @@ const invertLastNumber = () => {
     }
   } else {
     alert('The last element is symbol, not possible to invert');
+    return;
   }
 
   updateDisplay();
@@ -87,8 +86,9 @@ const handleComma = () => {
 };
 
 const handlePercentage = () => {
-  if (!currentInput) {
+  if (!currentInput || currentInput === '0,' || currentInput === '0') {
     alert("You cannot add '%' without a number.");
+    return;
   }
 
   if (!currentInput.includes('%')) {
@@ -96,6 +96,7 @@ const handlePercentage = () => {
     updateDisplay();
   } else {
     alert('The percentage sign is already added.');
+    return;
   }
 };
 
@@ -119,6 +120,11 @@ const handleCalculate = () => {
 
   if (realTimeScreenValue.length === 0) {
     alert('You need to input something before calculation');
+    return;
+  }
+
+  if (['+', '-', '*', '/'].includes(realTimeScreenValue[realTimeScreenValue.length - 1])) {
+    alert('There is no second operand');
     return;
   }
 
@@ -185,7 +191,6 @@ const evaluate = (expression) => {
 
 buttons.forEach((btn) => {
   btn.addEventListener('click', () => {
-    //? FIGURES handling
     if (btn.classList.contains('figure_btn')) {
       if (currentInput.endsWith('%') || currentInput.endsWith(')')) {
         alert("Cannot add numbers after '%' or')'.");
@@ -223,7 +228,6 @@ buttons.forEach((btn) => {
       updateDisplay();
     }
 
-    //? CLEAR handling
     if (btn.id === 'clear') {
       currentInput = '';
       realTimeScreenValue = [];
@@ -236,17 +240,14 @@ buttons.forEach((btn) => {
       handleErase();
     }
 
-    //? INVERT handling
     if (btn.id === 'invert') {
       invertLastNumber();
     }
 
-    //? COMMA handling
     if (btn.id === 'comma') {
       handleComma();
     }
 
-    //?PERCENT handling
     if (btn.id === 'percent') {
       handlePercentage();
     }
