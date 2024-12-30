@@ -206,7 +206,6 @@ buttons.forEach((btn) => {
       updateDisplay();
     }
 
-    //? BASIC OPERATORS handling (+,-,/,*)
     if (btn.classList.contains('basic_operator')) {
       commitCurrentInput();
 
