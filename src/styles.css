@@ -1,3 +1,25 @@
+[data-theme='orange'] {
+  --accent-bg-color: #ff9f0b;
+  --base-bg-color: #535353;
+  --lighten-bg-color: #646464;
+  --light-bg-color: #7d7d7d;
+  --base-text-color: #fff;
+  --darken-text-color: #7d7d7d;
+  --scroll-bg-color: #ff9d0b8c;
+  --scroll-element-color: #7d7d7d;
+}
+
+[data-theme='green'] {
+  --accent-bg-color: #28a745;
+  --base-bg-color: #344a34;
+  --lighten-bg-color: #3f5a3f;
+  --light-bg-color: #567c56;
+  --base-text-color: #ffffff;
+  --darken-text-color: #567c56;
+  --scroll-bg-color: #28a7458c;
+  --scroll-element-color: #567c56;
+}
+
 body {
   background-color: #f5f5f5;
   min-height: 90vh;
@@ -5,12 +27,11 @@ body {
   justify-content: center;
   align-items: center;
   font-family: sans-serif;
-  /* box-sizing: border-box; */
 }
 
 .container {
   box-sizing: border-box;
-  background-color: #535353;
+  background-color: var(--base-bg-color);
   max-width: 300px;
   height: auto;
   display: flex;
@@ -20,6 +41,23 @@ body {
   border-radius: 16px;
   user-select: none;
   box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
+}
+
+#settings {
+  width: 100%;
+}
+
+.switchColor {
+  background-color: var(--base-bg-color);
+  padding: 4px;
+  border: none;
+  outline: none;
+  color: var(--base-text-color);
+  width: 100%;
+  border-top-right-radius: 16px;
+  border-top-left-radius: 16px;
+  border-bottom: 1px solid var(--lighten-bg-color);
+  cursor: pointer;
 }
 
 #answerArea {
@@ -38,7 +76,7 @@ body {
 .inputHistory {
   text-align: right;
   font-size: large;
-  color: #7d7d7d;
+  color: var(--darken-text-color);
   width: 100%;
   white-space: nowrap;
   overflow-x: scroll;
@@ -50,16 +88,16 @@ body {
 }
 
 .inputHistory::-webkit-scrollbar-thumb {
-  background: #7d7d7d;
+  background: var(--scroll-element-color);
 }
 
 .inputHistory::-webkit-scrollbar-track {
-  background: #ff9d0b8c;
+  background: var(--scroll-bg-color);
 }
 
 .displayValue {
   font-size: xx-large;
-  color: white;
+  color: var(--base-text-color);
   white-space: nowrap;
 }
 
@@ -72,10 +110,10 @@ body {
 .keypad-btns button {
   outline: none;
   border: none;
-  background-color: #7d7d7d;
-  color: white;
+  background-color: var(--light-bg-color);
+  color: var(--base-text-color);
   font-size: x-large;
-  border: 1px solid #535353;
+  border: 1px solid var(--base-bg-color);
 }
 
 .keypad-btns button:last-child {
@@ -87,11 +125,11 @@ body {
 }
 
 .keypad-btns .accent_btn_top {
-  background-color: #646464;
+  background-color: var(--lighten-bg-color);
 }
 
 .keypad-btns .accent_btn_side {
-  background-color: #ff9f0b;
+  background-color: var(--accent-bg-color);
 }
 
 .accent_btn_side:hover,

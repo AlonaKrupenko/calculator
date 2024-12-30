@@ -18,6 +18,14 @@ let buttons = document.querySelectorAll('button');
 let currentInput = '';
 let realTimeScreenValue = [];
 
+const button = document.querySelector('[data-theme-toggle]');
+
+button.addEventListener('click', () => {
+  const currentTheme = document.querySelector('html').getAttribute('data-theme');
+  const newTheme = currentTheme === 'orange' ? 'green' : 'orange';
+  document.querySelector('html').setAttribute('data-theme', newTheme);
+});
+
 //HELPER
 const updateDisplay = () => {
   displayValue.innerHTML = realTimeScreenValue.join('') + currentInput || '0';
@@ -26,10 +34,8 @@ const updateDisplay = () => {
 //HELPER
 const commitCurrentInput = () => {
   if (currentInput) {
-    // trim trailing zeros may be moved to normalize
     currentInput = trimTrailingZeros(currentInput);
 
-    // potentially to move into normalize
     if (currentInput.startsWith('(-') && !currentInput.includes(')')) {
       realTimeScreenValue.push(currentInput + ')');
     } else {
